@@ -1,8 +1,8 @@
 exports.email = {
     // user:"winthose12@gmail.com",
     // password:"winthose2020x"
-    user:"reyhanjovie01@gmail.com",
-    password:"reyhan1234"
+    user:"email",
+    password:"password"
 }
 
 const name = "Sharing Session UIUX Designer - Alif Ghibran" 
