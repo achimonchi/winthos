@@ -8,7 +8,6 @@ const {email, seminar} = require('./config.js')
 try{
     if(fs.existsSync(seminar.session)){
         console.log("Sudah Ada")
-        
     } else {
         fs.mkdirSync(`./${seminar.session}`)
         // fs.mkdirSync(seminar.session)
@@ -23,30 +22,38 @@ try{
                     path : `${seminar.session}/${r[2]+"-"+r[1]}.pdf`,
                     filename : r[2]+"-"+r[1]+".pdf"
                 }
-                const doc = new PDFDocument({
-                    layout:'landscape',
-                    size:[960,1152],
-                    margin:0
-                });
+                try{
+                    if(data.name !== null){
+                        const doc = new PDFDocument({
+                            layout:'landscape',
+                            size:[960,1152],
+                            margin:0
+                        });
+        
+                        doc.image(`certificate/${seminar.cert}`,{
+                            width:1152,
+                            height:960
+                        });
+                        
+                        doc.pipe(fs.createWriteStream(`${seminar.session}/${data.name+"-"+data.email}.pdf`));
 
-                doc.image(`certificate/${seminar.cert}`,{
-                    width:1152,
-                    height:960
-                });
-                
-                doc.pipe(fs.createWriteStream(`${seminar.session}/${data.name+"-"+data.email}.pdf`));
-                
-                doc.fontSize(36)
-                    .font('fonts/OpenSans-Bold.ttf')
-                    .text(`${data.name}`,0,350,{
-                        width:1152,
-                        align:'center'
-                    });
-    
-                doc.end();
-                
+                        
+                        
+                        doc.fontSize(36)
+                            .fillColor("#333")
+                            .font('fonts/OpenSans-Bold.ttf')
+                            .text(`${data.name.toUpperCase()}`,0,350,{
+                                width:1152,
+                                align:'center'
+                            });
+            
+                        doc.end();
+                    }
+                }catch(err){
+                    console.log(err)
+                }
                 // await sendMail(data)
-            }
+            } 
         })
     })
     

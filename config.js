@@ -8,7 +8,7 @@ exports.email = {
 const name = "Sharing Session UIUX Designer - Alif Ghibran" 
 exports.seminar = {
     name,
-    xlsx : "Alif.xls",
+    xlsx : "ALIF.xlsx",
     cert : "Sesi-Alif.jpg",
     session : `Sesi-${name}`
 }
