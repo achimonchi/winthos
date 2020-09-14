@@ -1,106 +1,88 @@
-const PDFDocument = require('pdfkit');
-const nodemailer = require('nodemailer');
-const fs = require("fs");
+const fs = require('fs');
+const path = require('path');
 const excel = require("read-excel-file/node");
-const {email, seminar} = require('./config.js')
+const PDFDocument = require('pdfkit');
+const csv = require("csv-parser");
 
-// baca file excel
-try{
-    if(fs.existsSync(seminar.session)){
-        console.log("Sudah Ada")
-    } else {
-        fs.mkdirSync(`./${seminar.session}`)
-        // fs.mkdirSync(seminar.session)
-    }
+const directory = path.join(__dirname,'certificate');
 
-    excel(`./listPeserta/${seminar.xlsx}`).then(async(rows)=>{
-        await rows.map(async (r,i)=>{
-            if(i!=0){
-                const data = {
-                    name : r[2],
-                    email : r[1],
-                    path : `${seminar.session}/${r[2]+"-"+r[1]}.pdf`,
-                    filename : r[2]+"-"+r[1]+".pdf"
+
+fs.readdir(directory, (err, files)=>{
+    const data = splitFiles(files);
+    data.map((d)=>{
+        if(fs.existsSync(`Sharing Session`)){
+
+        } else {
+            fs.mkdirSync(`./Sharing Session`);
+        }
+
+        if(fs.existsSync(`Sharing Session/${d.session}`)){
+            console.log("Sudah Ada");
+        } else {
+            fs.mkdirSync(`./Sharing Session/${d.session}`);
+            console.log(`Try to creating ${d.session}`)
+        }
+
+        fs.createReadStream(`./WINTHOSE-2020/${d.xlsx}`)
+            .pipe(csv())
+            .on('data', (row)=>{
+                const dataPDF = {
+                    name : row["NAMA LENGKAP"],
+                    email : row["Nama pengguna"],
+                    path : `${d.session}/${row["NAMA LENGKAP"]+"-"+row["Nama pengguna"]}.pdf`,
+                    filename : row["NAMA LENGKAP"]+"-"+row["Nama pengguna"]+".pdf"
                 }
+
                 try{
-                    if(data.name !== null){
+                    if(dataPDF.name !== null && dataPDF.name !== undefined){
                         const doc = new PDFDocument({
                             layout:'landscape',
                             size:[960,1152],
                             margin:0
                         });
         
-                        doc.image(`certificate/${seminar.cert}`,{
+                        doc.image(`certificate/${d.cert}`,{
                             width:1152,
                             height:960
                         });
                         
-                        doc.pipe(fs.createWriteStream(`${seminar.session}/${data.name+"-"+data.email}.pdf`));
-
-                        
+                        doc.pipe(fs.createWriteStream(`Sharing Session/${d.session}/${dataPDF.name+"-"+dataPDF.email}.pdf`));
                         
                         doc.fontSize(36)
                             .fillColor("#333")
                             .font('fonts/OpenSans-Bold.ttf')
-                            .text(`${data.name.toUpperCase()}`,0,350,{
+                            .text(`${dataPDF.name.toUpperCase()}`,0,350,{
                                 width:1152,
                                 align:'center'
                             });
             
                         doc.end();
+                    } else {
+                        console.log(dataPDF)
                     }
-                }catch(err){
-                    console.log(err)
+                } catch(err){
+                    console.log(err);
                 }
-                // await sendMail(data)
-            } 
-        })
+            })
+            .on('end',()=>{
+                console.log(`Success ${d.xlsx}`)
+            })
     })
-    
-} catch(err){
-    console.log(err)
-}
+})
 
-// setup transporter
-const transporter = nodemailer.createTransport({
-    service : 'gmail',
-    secure:false,
-    port : 587,
-    auth:{
-        user : email.user,
-        pass : email.password
-    },
-    tls : {
-        rejectUnauthorized : false
-    }
-});
+function splitFiles(files){
+    let arr = [];
+    files.map((f)=>{
+        const fileName = f.split(".")[0];
+        const data = {
+            fileName,
+            xlsx : fileName.split("-")[1].toUpperCase()+".csv",
+            cert : fileName+".jpg",
+            session : `${fileName}`
 
-// function sendMail
-const sendMail=async(data)=>{
-    return new Promise((resolve, reject)=>{
-        // configuration pada mail
-        const mailOptions = {
-            from : '"Support Winthose" <no-reply@winthose.org>',
-            to : `${data.email}`,
-            subject : `Thanks For Join in ${seminar.name}`,
-            text : '',
-            html : `PDF Certificate For <b>Winthose</b>`,
-            attachments: [
-                {
-                    filename:data.filename,
-                    path:data.path,
-                    contentType:"application/pdf"
-                }
-            ]
-        };
-
-        console.log(`Prepare send to ${data.email} `)
-
-        // // kirim email
-        transporter.sendMail(mailOptions,(err,info)=>{
-            if(err) reject(err);
-            resolve(true);
-            console.log(`Email sent to :  ${data.email}`)
-        })
+        }
+        arr.push(data);
     })
+
+    return arr;
 }
