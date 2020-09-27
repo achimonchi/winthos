@@ -5,6 +5,7 @@ const PDFDocument = require('pdfkit');
 const csv = require("csv-parser");
 
 // ini nama directory / folder untuk sertifikat
+// IPC-Cert diganti
 const directory = path.join(__dirname,'IPC-Cert');
 
 
