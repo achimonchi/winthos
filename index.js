@@ -4,7 +4,7 @@ const excel = require("read-excel-file/node");
 const PDFDocument = require('pdfkit');
 const csv = require("csv-parser");
 
-const directory = path.join(__dirname,'certificate');
+const directory = path.join(__dirname,'IPC-Cert');
 
 
 fs.readdir(directory, (err, files)=>{
@@ -23,7 +23,7 @@ fs.readdir(directory, (err, files)=>{
             console.log(`Try to creating ${d.session}`)
         }
 
-        fs.createReadStream(`./WINTHOSE-2020/${d.xlsx}`)
+        fs.createReadStream(`./IPC/${d.xlsx}`)
             .pipe(csv())
             .on('data', (row)=>{
                 const dataPDF = {
@@ -41,7 +41,7 @@ fs.readdir(directory, (err, files)=>{
                             margin:0
                         });
         
-                        doc.image(`certificate/${d.cert}`,{
+                        doc.image(`IPC-Cert/${d.cert}`,{
                             width:1152,
                             height:960
                         });
@@ -49,9 +49,9 @@ fs.readdir(directory, (err, files)=>{
                         doc.pipe(fs.createWriteStream(`Sharing Session/${d.session}/${dataPDF.name+"-"+dataPDF.email}.pdf`));
                         
                         doc.fontSize(36)
-                            .fillColor("#333")
+                            .fillColor("#000000")
                             .font('fonts/OpenSans-Bold.ttf')
-                            .text(`${dataPDF.name.toUpperCase()}`,0,350,{
+                            .text(`${dataPDF.name.toUpperCase()}`,0,400,{
                                 width:1152,
                                 align:'center'
                             });
@@ -76,8 +76,8 @@ function splitFiles(files){
         const fileName = f.split(".")[0];
         const data = {
             fileName,
-            xlsx : fileName.split("-")[1].toUpperCase()+".csv",
-            cert : fileName+".jpg",
+            xlsx : fileName.toUpperCase()+".csv",
+            cert : fileName+".png",
             session : `${fileName}`
 
         }
