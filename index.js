@@ -4,6 +4,7 @@ const excel = require("read-excel-file/node");
 const PDFDocument = require('pdfkit');
 const csv = require("csv-parser");
 
+// ini nama directory / folder untuk sertifikat
 const directory = path.join(__dirname,'IPC-Cert');
 
 
@@ -23,6 +24,7 @@ fs.readdir(directory, (err, files)=>{
             console.log(`Try to creating ${d.session}`)
         }
 
+        // IPC adalah folder CSV
         fs.createReadStream(`./IPC/${d.xlsx}`)
             .pipe(csv())
             .on('data', (row)=>{
@@ -40,7 +42,8 @@ fs.readdir(directory, (err, files)=>{
                             size:[960,1152],
                             margin:0
                         });
-        
+                        
+                        // IPC-Cert folder sertifikat
                         doc.image(`IPC-Cert/${d.cert}`,{
                             width:1152,
                             height:960
@@ -50,7 +53,7 @@ fs.readdir(directory, (err, files)=>{
                         
                         doc.fontSize(36)
                             .fillColor("#000000")
-                            .font('fonts/OpenSans-Bold.ttf')
+                            .font('fonts/OpenSans-Bold.ttf') // 400, adalah ukuran jarak nama ke atas
                             .text(`${dataPDF.name.toUpperCase()}`,0,400,{
                                 width:1152,
                                 align:'center'
